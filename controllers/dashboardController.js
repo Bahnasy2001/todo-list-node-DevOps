@@ -5,7 +5,7 @@ const User = require('../models/register');
 module.exports.dashboard = function(req, res){
     const data = Dashboard.find({})
     .then(function(data){
-        User.findOne({email : "ankitvis609@gmail.com"})
+        User.findOne({email : "example@example.com"})
         .then(function(user){
         return res.render('dashboard', {
             title: "Dashboard",

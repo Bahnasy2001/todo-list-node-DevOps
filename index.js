@@ -4,7 +4,7 @@ const path = require('path');
 
 // require the mongoose file
 const db = require('./config/mongoose');
-const User = require('./models/register');
+const Register = require('./models/register');
 const Login = require('./models/login');
 const Dashboard = require('./models/dashboard');
 
