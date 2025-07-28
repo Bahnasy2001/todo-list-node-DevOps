@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  todolist-app:
+    image: your-registry-username/todolist-app:3 
+    ports:
+      - "4000:4000"
+    restart: always
+    depends_on:
+      - mongodb
+    environment:
+      - NODE_ENV=production
+      - mongoDbUrl=mongodb://mongodb:27017/todolistDb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb:27017/todolistDb --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mongo-data:

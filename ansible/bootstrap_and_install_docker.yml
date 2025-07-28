@@ -1,0 +1,92 @@
+---
+- name: Bootstrap server and install Docker
+  hosts: _todolist_ci_cd         
+  become: yes
+  vars:
+    ansible_user: ubuntu             # initial user to connect as
+    new_user: ansible-user
+
+  tasks:
+    - name: Create ansible-user with sudo
+      user:
+        name: "{{ new_user }}"
+        groups: sudo
+        shell: /bin/bash
+        state: present
+        create_home: yes
+
+    - name: Allow sudo group to have passwordless sudo
+      copy:
+        dest: /etc/sudoers.d/90-cloud-init-users
+        content: "%sudo ALL=(ALL) NOPASSWD:ALL"
+        owner: root
+        group: root
+        mode: '0440'
+
+    - name: Create .ssh directory for ansible-user
+      file:
+        path: "/home/{{ new_user }}/.ssh"
+        state: directory
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0700'
+
+    - name: Copy authorized_keys from ubuntu user
+      copy:
+        src: "/home/ubuntu/.ssh/authorized_keys"
+        dest: "/home/{{ new_user }}/.ssh/authorized_keys"
+        owner: "{{ new_user }}"
+        group: "{{ new_user }}"
+        mode: '0600'
+        remote_src: yes
+
+
+- name: Install Docker and Docker Compose as ansible-user
+  hosts: _todolist_ci_cd
+  become: yes
+  vars:
+    ansible_user: "{{ new_user }}"   # switch to ansible-user for next tasks
+    new_user: ansible-user  # Ensure it's defined in this play as well
+
+  tasks:
+    - name: Install required apt packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+        update_cache: yes
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Install Docker CE and Docker Compose plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Add ansible-user to docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+
+    - name: Enable Docker service
+      systemd:
+        name: docker
+        enabled: yes
+        state: started
