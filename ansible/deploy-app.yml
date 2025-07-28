@@ -1,0 +1,27 @@
+---
+- name: Deploy ToDo list application with Docker Compose
+  hosts: _todolist_ci_cd
+  become: yes
+
+  tasks:
+    - name: Create app directory
+      file:
+        path: /home/ansible-user/todolist-app
+        state: directory
+        owner: ansible-user
+        group: ansible-user
+        mode: 0755
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: docker-compose.yml
+        dest: /home/ansible-user/todolist-app/docker-compose.yml
+        owner: ansible-user
+        group: ansible-user
+        mode: 0644
+
+    - name: Ensure Docker Compose is up
+      become_user: ansible-user
+      community.docker.docker_compose:
+        project_src: /home/ansible-user/todolist-app
+        state: present

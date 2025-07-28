@@ -2,14 +2,15 @@ version: '3.8'
 
 services:
   todolist-app:
-    image: your-registry-username/todolist-app:3 
+    image: hassanbahnasy/todolist-application:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     ports:
       - "4000:4000"
     restart: always
     depends_on:
       - mongodb
     environment:
-      - NODE_ENV=production
       - mongoDbUrl=mongodb://mongodb:27017/todolistDb
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000"]
@@ -18,7 +19,7 @@ services:
       retries: 5
 
   mongodb:
-    image: mongo:6
+    image: mongo:8
     container_name: mongodb
     restart: always
     ports:
@@ -30,6 +31,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --cleanup
+    
 
 volumes:
   mongo-data:
