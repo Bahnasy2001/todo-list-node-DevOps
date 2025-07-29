@@ -3,7 +3,7 @@
   hosts: _todolist_ci_cd         
   become: yes
   vars:
-    ansible_user: ubuntu             # initial user to connect as
+    ansible_user: ubuntu             
     new_user: ansible-user
 
   tasks:

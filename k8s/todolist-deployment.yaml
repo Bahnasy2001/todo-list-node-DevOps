@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todolist-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todolist-app
+  template:
+    metadata:
+      labels:
+        app: todolist-app
+    spec:
+      imagePullSecrets:
+          - name: regcred
+      containers:
+        - name: todolist-app
+          image: hassanbahnasy/todolist-application:latest
+          ports:
+            - containerPort: 4000
+          env:
+            - name: mongoDbUrl
+              value: mongodb://mongodb:27017/todolistDb
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 10

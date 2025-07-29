@@ -37,7 +37,7 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/bahnasy/.docker/config.json:/config.json
+      - /home/ansible-user/.docker/config.json:/config.json
     environment:
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=30
